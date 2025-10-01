@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.params import Depends, Path
 from sqlalchemy.orm import Session
 from fastapi import status
+from starlette.responses import FileResponse
 
 from TodoApp.db import mapper_registry, engine, get_db
 from TodoApp.models import *
@@ -17,7 +18,15 @@ mapper_registry.metadata.create_all(
 
 db_dependency = Annotated[Session,Depends(get_db)]
 
+
+
+
 @app.get("/")
+async def root():
+    return FileResponse("index.html")
+
+
+@app.get("/todos")
 async def get_all(
         db:db_dependency
 ):
@@ -27,7 +36,7 @@ async def get_all(
 @app.get("/todo/{todo_id}")
 async def get_todo(
         db:db_dependency,todo_id:int = Path(
-            ge=0,le=5
+            ge=0,
         )
 ):
     todo_model = db.get(Todo, todo_id)
