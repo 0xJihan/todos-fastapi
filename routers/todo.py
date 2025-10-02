@@ -1,39 +1,27 @@
 from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.params import Depends, Path
 from sqlalchemy.orm import Session
 from fastapi import status
 from starlette.responses import FileResponse
 
-from TodoApp.db import mapper_registry, engine, get_db
-from TodoApp.models import *
+from db import mapper_registry, engine, get_db
 
-app = FastAPI()
+from models import *
 
-
-mapper_registry.metadata.create_all(
-    bind=engine
-)
-
+router = APIRouter()
 db_dependency = Annotated[Session,Depends(get_db)]
 
 
-
-
-@app.get("/")
-async def root():
-    return FileResponse("index.html")
-
-
-@app.get("/todos")
+@router.get("/todos")
 async def get_all(
         db:db_dependency
 ):
     return db.query(Todo).all()
 
 
-@app.get("/todo/{todo_id}")
+@router.get("/todo/{todo_id}")
 async def get_todo(
         db:db_dependency,todo_id:int = Path(
             ge=0,
@@ -47,7 +35,7 @@ async def get_todo(
        return HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Todo not found")
 
 
-@app.post("/todo",status_code=status.HTTP_201_CREATED)
+@router.post("/todo",status_code=status.HTTP_201_CREATED)
 async def create_todo(
         db:db_dependency,
         request:TodoRequest
@@ -59,7 +47,7 @@ async def create_todo(
     return todo_model
 
 
-@app.put("/todo/{todo_id}",status_code=status.HTTP_202_ACCEPTED)
+@router.put("/todo/{todo_id}",status_code=status.HTTP_202_ACCEPTED)
 async def update_todo(db:db_dependency,request:TodoRequest,todo_id:int=Path(gt=0)):
 
 
@@ -77,7 +65,7 @@ async def update_todo(db:db_dependency,request:TodoRequest,todo_id:int=Path(gt=0
 
 
 
-@app.delete("/todo/{todo_id}",status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/todo/{todo_id}",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo(db:db_dependency,todo_id:int=Path(gt=0)):
     todo_model = db.get(Todo,todo_id)
 

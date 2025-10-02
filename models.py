@@ -3,7 +3,7 @@
 from pydantic import BaseModel, Field
 from sqlalchemy import Column, Integer, String, Boolean
 
-from TodoApp.db import BASE
+from db import BASE
 
 
 class Todo(BASE):
