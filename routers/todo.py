@@ -20,7 +20,7 @@ async def get_all(
         user: user_dependency,
         db:db_dependency
 ):
-    return db.query(Todo).filter(Todo.owner_id==user.get("owner_id")).all()
+    return db.query(Todo).filter(Todo.owner_id==user.get("user_id")).all()
 
 
 @router.get("/todo/{todo_id}")
@@ -44,7 +44,8 @@ async def create_todo(
         db:db_dependency,
         request:TodoRequest,
 ):
-    todo_model = Todo(**request.model_dump(),owner_id=user.get("id"))
+    todo_model = Todo(**request.model_dump(),owner_id=user.get("user_id"))
+    print(f"User ID: {user.get('user_id')}")
     db.add(todo_model)
     db.commit()
     db.refresh(todo_model)

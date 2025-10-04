@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, registry
 
-DB_URL = "sqlite:///./sqlite/todos.db"
+DB_URL = "postgresql://postgres:password@localhost/TodoApp"
 
-engine = create_engine(DB_URL,connect_args={'check_same_thread': False})
+engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 mapper_registry = registry()
