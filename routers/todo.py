@@ -1,29 +1,32 @@
 from typing import Annotated
 
-from fastapi import FastAPI, HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter
 from fastapi.params import Depends, Path
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from fastapi import status
-from starlette.responses import FileResponse
 
-from db import mapper_registry, engine, get_db
-
-from models import *
+from database.db import get_db
+from middleware.authenticate import authenticate_user, user_dependency
+from models.models import Todo, TodoRequest
 
 router = APIRouter()
 db_dependency = Annotated[Session,Depends(get_db)]
 
 
+
 @router.get("/todos")
 async def get_all(
+        user: user_dependency,
         db:db_dependency
 ):
-    return db.query(Todo).all()
+    return db.query(Todo).filter(Todo.owner_id==user.get("owner_id")).all()
 
 
 @router.get("/todo/{todo_id}")
 async def get_todo(
-        db:db_dependency,todo_id:int = Path(
+        db:db_dependency,
+        todo_id:int = Path(
             ge=0,
         )
 ):
@@ -37,10 +40,11 @@ async def get_todo(
 
 @router.post("/todo",status_code=status.HTTP_201_CREATED)
 async def create_todo(
+        user: user_dependency,
         db:db_dependency,
-        request:TodoRequest
+        request:TodoRequest,
 ):
-    todo_model = Todo(**request.model_dump())
+    todo_model = Todo(**request.model_dump(),owner_id=user.get("id"))
     db.add(todo_model)
     db.commit()
     db.refresh(todo_model)

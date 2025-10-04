@@ -1,43 +1,23 @@
-
-
-import jwt
 from fastapi import FastAPI
-from pwdlib import PasswordHash
+from fastapi.params import Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
-from Utils import encrypt_password, verify_password, generateToken, decodeToken
-from db import mapper_registry, engine
-from routers import todo
-from models import *
-
-
+from routers.todo import db_dependency
+from utils.Utils import encrypt_password, verify_password, generateToken, decodeToken
+from database.db import mapper_registry, engine
+from middleware.authenticate import authenticate_user
+from routers import todo, auth
 
 app = FastAPI()
 
 mapper_registry.metadata.create_all(bind=engine)
 
 app.include_router(todo.router)
-
-
-@app.get("/")
-async def Test_Route():
+app.include_router(auth.router)
 
 
 
-    stmt = {
-        "id":5,
-        "email":"jihankhan966@gmail.com"
-    }
-
-
-    token = generateToken(stmt)
-
-    decoded_token = decodeToken(token)
 
 
 
-    return {
-        "token": token,
-        "decoded": decoded_token,
-        "hashed_password": encrypt_password("mysecretpassword"),
-        "is_verified": verify_password("mysecretpassword", encrypt_password("mysecretpassword"))
-    }
+

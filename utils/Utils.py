@@ -31,5 +31,14 @@ def generateToken(values:dict,delta:timedelta | None = None):
     )
 
 
-def decodeToken(token:str):
-    return jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+def decodeToken(token:str) -> dict:
+    try:
+        payload = jwt.decode(token,SECRET_KEY,algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise Exception("Token has expired")
+    except jwt.InvalidTokenError:
+        raise Exception("Invalid token")
+    except Exception as e:
+        print(e)
+        raise Exception("Token decode error: " + str(e))
