@@ -13,6 +13,7 @@ class Todo(BASE):
     description = Column(String)
     priority = Column(Integer)
     completed = Column(Boolean,default=False)
+    favourite = Column(Boolean,default=False)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
 
@@ -20,7 +21,8 @@ class Todo(BASE):
 class TodoRequest(BaseModel):
     title: str = Field(min_length=3,max_length=50)
     description: str = Field(min_length=3,max_length=100)
-    priority: int =  Field(gt=0,lt=100)
+    priority: int =  Field(gt=0,lt=100),
+    favourite: bool
     completed: bool
 
 
